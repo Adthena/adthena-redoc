@@ -331,6 +331,9 @@ A new parameter called `requestSamplesLanguages` was added to `options` Object t
 ```javascript
 ['curl','python']
 ```
+
+When the `x-codeSamples` and `x-code-samples` are not set, it will
+automatically generate the code samples based on the language(s) you set.
 -----------
 ## Development
 see [CONTRIBUTING.md](.github/CONTRIBUTING.md)

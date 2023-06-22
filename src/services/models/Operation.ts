@@ -1,4 +1,4 @@
-import { action, observable, makeObservable } from 'mobx';
+import { action, makeObservable, observable } from 'mobx';
 
 import {
   extractExtensions,
@@ -10,6 +10,7 @@ import {
   normalizeServers,
   sortByField,
   sortByRequired,
+  titleize,
 } from '../../utils';
 
 import { GroupModel } from './Group.model';
@@ -18,13 +19,17 @@ import { CallbackModel } from './Callback';
 import { FieldModel } from './Field';
 import { RequestBodyModel } from './RequestBody';
 import { ResponseModel } from './Response';
+import type { ContentItemModel, ExtendedOpenAPIOperation, IMenuItem } from '../types';
 import { SideNavStyleEnum } from '../types';
 
 import type { OpenAPIExternalDocumentation, OpenAPIServer, OpenAPIXCodeSample } from '../../types';
 import type { OpenAPIParser } from '../OpenAPIParser';
-import type { RedocNormalizedOptions } from '../RedocNormalizedOptions';
+import type { RedocNormalizedOptions, RequestSamplesLanguage } from '../RedocNormalizedOptions';
 import type { MediaContentModel } from './MediaContent';
-import type { ContentItemModel, ExtendedOpenAPIOperation, IMenuItem } from '../types';
+import { REQUEST_SAMPLE_LANGUAGES } from '../../constants/languages';
+import { CurlRequestModel } from './CurlRequest';
+
+const { CURL } = REQUEST_SAMPLE_LANGUAGES;
 
 export interface XPayloadSample {
   lang: 'payload';
@@ -79,6 +84,7 @@ export class OperationModel implements IMenuItem {
   isCallback: boolean;
   isWebhook: boolean;
   isEvent: boolean;
+  requestSamplesLanguages: RequestSamplesLanguage[];
 
   constructor(
     private parser: OpenAPIParser,
@@ -144,6 +150,8 @@ export class OperationModel implements IMenuItem {
     if (options.showExtensions) {
       this.extensions = extractExtensions(operationSpec, options.showExtensions);
     }
+
+    this.requestSamplesLanguages = options.requestSamplesLanguages;
   }
 
   /**
@@ -203,8 +211,20 @@ export class OperationModel implements IMenuItem {
       console.warn('"x-code-samples" is deprecated. Use "x-codeSamples" instead');
     }
 
-    const requestBodyContent = this.requestBody && this.requestBody.content;
-    if (requestBodyContent && requestBodyContent.hasSample) {
+    const requestBodyContent = this.requestBody?.content?.hasSample
+      ? this.requestBody.content
+      : undefined;
+    const availableForGeneration = this.requestSamplesLanguages.filter(
+      lang => !samples.some(sample => sample.lang.toLowerCase() === lang),
+    );
+
+    samples = availableForGeneration.flatMap((lang: RequestSamplesLanguage) => {
+      const example = this.generateRequestExamples(lang, requestBodyContent);
+
+      return [example, ...samples];
+    });
+
+    if (requestBodyContent) {
       const insertInx = Math.min(samples.length, this.options.payloadSampleIdx);
 
       samples = [
@@ -220,6 +240,37 @@ export class OperationModel implements IMenuItem {
     }
 
     return samples;
+  }
+
+  private generateRequestExamples(
+    lang: RequestSamplesLanguage,
+    requestBodyContent?: MediaContentModel,
+  ): OpenAPIXCodeSample | XPayloadSample {
+    const props = {
+      lang,
+      label: titleize(lang),
+    };
+
+    switch (lang) {
+      case CURL: {
+        const curlRequest = new CurlRequestModel({
+          apiKeys: this.security.flatMap(security =>
+            security.schemes.filter(scheme => scheme.id === 'api_key'),
+          ),
+          method: this.httpVerb,
+          parameters: this.parameters,
+          path: this.path,
+          requestBody: requestBodyContent,
+          serverUrl: this.servers[0].url,
+        });
+        return {
+          ...props,
+          source: curlRequest.getCurlCommand(),
+        };
+      }
+      default:
+        throw new Error(`Unsupported code sample language: ${lang}`);
+    }
   }
 
   @memoize

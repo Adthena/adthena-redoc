@@ -5,8 +5,10 @@ import { isArray, isNumeric, mergeObjects } from '../utils/helpers';
 import { setRedocLabels } from './Labels';
 import { SideNavStyleEnum } from './types';
 import type { LabelsConfigRaw, MDXComponentMeta } from './types';
+import { REQUEST_SAMPLE_LANGUAGES } from '../constants/languages';
 
-export type RequestSamplesLanguage = 'curl' | 'python';
+export type RequestSamplesLanguage =
+  typeof REQUEST_SAMPLE_LANGUAGES[keyof typeof REQUEST_SAMPLE_LANGUAGES];
 
 export interface RedocRawOptions {
   theme?: ThemeInterface;

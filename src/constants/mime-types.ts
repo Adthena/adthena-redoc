@@ -1,6 +1,7 @@
 export const MIME_TYPES = {
-  JSON: 'application/json',
-  XML: 'application/xml',
-  FORM_URL_ENCODED: 'application/x-www-form-urlencoded',
-  FORM_DATA: 'multipart/form-data',
+  APPLICATION_FORM_URLENCODED: 'application/x-www-form-urlencoded',
+  APPLICATION_JSON: 'application/json',
+  APPLICATION_OCTET_STREAM: 'application/octet-stream',
+  APPLICATION_XML: 'application/xml',
+  MULTIPART_FORM_DATA: 'multipart/form-data',
 } as const;

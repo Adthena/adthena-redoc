@@ -148,7 +148,7 @@ export abstract class RequestGenerator implements RequestGeneratorOptions {
   }
 
   protected buildFetchHeaders(): Headers {
-    const defaultAcceptHeader = MIME_TYPES.JSON;
+    const defaultAcceptHeader = MIME_TYPES.APPLICATION_JSON;
     const reqHeaders = new Headers();
 
     // Add Authentication Header if provided
@@ -173,7 +173,7 @@ export abstract class RequestGenerator implements RequestGeneratorOptions {
 
     if (this.requestBody?.mediaTypes.length) {
       const [mediaType] = this.requestBody.mediaTypes;
-      if (mediaType.name !== MIME_TYPES.FORM_DATA) {
+      if (mediaType.name !== MIME_TYPES.MULTIPART_FORM_DATA) {
         // For multipart/form-data dont set the content-type to allow creation of browser generated part boundaries
         reqHeaders.append(REQUEST_HEADERS.CONTENT_TYPE, mediaType.name);
       }
@@ -195,7 +195,7 @@ export abstract class RequestGenerator implements RequestGeneratorOptions {
     const { examples, name } = mediaType;
 
     if (examples) {
-      if (name === MIME_TYPES.FORM_URL_ENCODED && examples) {
+      if (name === MIME_TYPES.APPLICATION_FORM_URLENCODED && examples) {
         const formUrlParams = new URLSearchParams();
         Object.entries(examples)
           .filter(([, example]) => !example.mime.includes('file'))
@@ -211,7 +211,7 @@ export abstract class RequestGenerator implements RequestGeneratorOptions {
             }
           });
         fetchOptions.body = formUrlParams;
-      } else if (name === MIME_TYPES.FORM_DATA) {
+      } else if (name === MIME_TYPES.MULTIPART_FORM_DATA) {
         const formDataParams = new FormData();
         const [{ value }] = Object.values(examples as object);
         const formDataEls = Object.entries(value);
@@ -230,7 +230,11 @@ export abstract class RequestGenerator implements RequestGeneratorOptions {
       ) {
         const [{ value }] = Object.values(examples as object);
         fetchOptions.body = value;
-      } else if (name === MIME_TYPES.JSON || name === MIME_TYPES.XML || name.includes('text')) {
+      } else if (
+        name === MIME_TYPES.APPLICATION_JSON ||
+        name === MIME_TYPES.APPLICATION_XML ||
+        name.includes('text')
+      ) {
         const [{ value }] = Object.values(examples as object);
 
         fetchOptions.body = value;

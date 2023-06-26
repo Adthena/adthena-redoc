@@ -5,6 +5,7 @@ import {
   RequestGeneratorOptions,
 } from './RequestGenerator';
 import { groupParamsByKey } from '../utils';
+import { MIME_TYPES } from '../constants/mime-types';
 
 const NEW_LINE = '\n';
 
@@ -118,11 +119,11 @@ export class PythonRequest extends RequestGenerator {
 
   private getResponseLogging(acceptHeader: string) {
     switch (acceptHeader) {
-      case 'application/json':
+      case MIME_TYPES.APPLICATION_JSON:
         return 'print(response.json())';
-      case 'application/octet-stream':
+      case MIME_TYPES.APPLICATION_OCTET_STREAM:
         return 'print(response.content)';
-      case 'application/x-www-form-urlencoded':
+      case MIME_TYPES.APPLICATION_FORM_URLENCODED:
       default:
         return 'print(response.text)';
     }

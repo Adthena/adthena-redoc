@@ -1,14 +1,26 @@
-import { FieldModel } from './Field';
-import { SecurityScheme } from './SecurityRequirement';
-import { MediaContentModel } from './MediaContent';
-import { getSerializedValue } from '../../utils';
-import { MediaTypeModel } from './MediaType';
+import { FieldModel, MediaContentModel, MediaTypeModel } from './models';
+import { SecurityScheme } from './models/SecurityRequirement';
+import { getSerializedValue, serializeParameterValue } from '../utils';
 
-const NEW_LINE = '\\\n';
-
-interface FetchBodyOptions {
-  method: string;
+export interface FetchBodyOptions {
   body?: any;
+  method: string;
+}
+
+export interface RequestGeneratorOptions {
+  apiKeys: SecurityScheme[];
+  method: string;
+  parameters: FieldModel[];
+  path: string;
+  requestBody?: MediaContentModel;
+  serverUrl: string;
+}
+
+export interface FetchUrlOptions {
+  cookieParams?: URLSearchParams;
+  fetchUrl: string;
+  fullUrl: string;
+  queryParams?: URLSearchParams;
 }
 
 /**
@@ -36,84 +48,103 @@ interface FetchBodyOptions {
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-export class CurlRequestModel {
+export abstract class RequestGenerator implements RequestGeneratorOptions {
   apiKeys: SecurityScheme[];
   method: string;
   parameters: FieldModel[];
   path: string;
-  requestBody?: MediaContentModel;
+  requestBody?: MediaContentModel | undefined;
   serverUrl: string;
 
-  constructor({ apiKeys, method, parameters, path, requestBody, serverUrl }) {
-    this.apiKeys = apiKeys;
-    this.method = method;
-    this.parameters = parameters;
-    this.path = path.startsWith('/') ? path : `/${path}`;
-    this.requestBody = requestBody;
-    this.serverUrl = serverUrl;
+  constructor(options: RequestGeneratorOptions) {
+    this.apiKeys = options.apiKeys;
+    this.method = options.method;
+    this.parameters = options.parameters;
+    this.path = options.path.startsWith('/') ? options.path : `/${options.path}`;
+    this.requestBody = options.requestBody;
+    this.serverUrl = options.serverUrl;
   }
 
-  getCurlCommand(): string {
-    const fetchUrl = this.buildFetchUrl();
-    const fetchHeaders = this.buildFetchHeaders();
-    const fetchOptions = this.buildFetchBodyOptions();
+  protected buildFetchUrl(): FetchUrlOptions {
+    let fetchUrl = this.path;
 
-    return this.generateCurlSyntax(fetchUrl, fetchHeaders, fetchOptions);
-  }
-
-  private buildFetchUrl() {
-    let fetchUrl;
-    fetchUrl = this.path;
     // Generate URL using Path Params
     this.parameters
       .filter(param => param.in === 'path' && typeof param.example !== 'undefined')
       .forEach(param => {
-        fetchUrl = fetchUrl.replace(`{${param.name}}`, encodeURIComponent(param.example as string));
+        fetchUrl = fetchUrl.replace(
+          `{${param.name}}`,
+          serializeParameterValue(param, param.example as string),
+        );
       });
 
     // Query Params
-    const urlQueryParamsMap = new Map();
+    const urlQueryParams = new URLSearchParams();
     const queryParameters = this.parameters.filter(param => param.in === 'query');
-    if (queryParameters.length > 0) {
-      queryParameters.forEach((param: FieldModel) => {
-        const queryParam = new URLSearchParams();
-        const value = param.example ?? param.schema.default;
+    queryParameters.forEach((param: FieldModel) => {
+      const value = param.example ?? param.schema.default ?? param.schema.enum?.[0];
 
-        if (typeof value !== 'undefined') {
-          const serializedParam = getSerializedValue(param, value);
-          queryParam.append(param.name, serializedParam);
+      if (typeof value !== 'undefined') {
+        const serializedParam = getSerializedValue(param, value);
+        if (serializedParam.includes('&')) {
+          const values = serializedParam.split('&').map(val => val.split('=').pop());
+          values.forEach(val => {
+            urlQueryParams.append(param.name, val);
+          });
+        } else {
+          const [, serializedValue] = serializedParam.split('=');
+          urlQueryParams.append(param.name, serializedValue);
         }
-        if (queryParam.toString()) {
-          urlQueryParamsMap.set(param.name, queryParam);
-        }
-      });
-    }
+      }
+    });
+
+    fetchUrl = `${this.serverUrl.replace(/\/$/, '')}${fetchUrl}`;
 
     let urlQueryParamString = '';
-    if (urlQueryParamsMap.size) {
-      urlQueryParamsMap.forEach((val, pname) => {
-        urlQueryParamString += `${val.get(pname)}&`;
+    let fullUrl = fetchUrl;
+
+    if (urlQueryParams.toString()) {
+      const params: string[] = [];
+      urlQueryParams.forEach((value, key) => {
+        params.push(`${key}=${value}`);
       });
-      urlQueryParamString = urlQueryParamString.slice(0, -1);
+      urlQueryParamString = params.join('&');
     }
     if (urlQueryParamString.length !== 0) {
-      fetchUrl = `${fetchUrl}${fetchUrl.includes('?') ? '&' : '?'}${urlQueryParamString}`;
+      fullUrl = `${fullUrl}?${urlQueryParamString}`;
     }
 
     // Add authentication Query-Param if provided
     this.apiKeys
       .filter(scheme => scheme.in === 'query')
       .forEach(scheme => {
-        fetchUrl = `${fetchUrl}${fetchUrl.includes('?') ? '&' : '?'}${
+        fullUrl = `${fullUrl}${fullUrl.includes('?') ? '&' : '?'}${
           scheme.name
         }=${encodeURIComponent(scheme.displayName)}`;
       });
 
-    fetchUrl = `${this.serverUrl.replace(/\/$/, '')}${fetchUrl}`;
-    return fetchUrl;
+    const cookieParams = new URLSearchParams();
+    this.parameters
+      .filter(param => param.in === 'cookie')
+      .forEach(param => {
+        const value = param.example ?? param.schema.default;
+
+        if (typeof value !== 'undefined') {
+          const serializedParam = getSerializedValue(param, value);
+          const [, serializedValue] = serializedParam.split('=');
+          cookieParams.append(param.name, serializedValue);
+        }
+      });
+
+    return {
+      cookieParams,
+      fetchUrl,
+      fullUrl,
+      queryParams: urlQueryParams,
+    };
   }
 
-  private buildFetchHeaders() {
+  protected buildFetchHeaders(): Headers {
     const defaultAcceptHeader = 'application/json';
     const reqHeaders = new Headers();
 
@@ -152,7 +183,7 @@ export class CurlRequestModel {
     return reqHeaders;
   }
 
-  private buildFetchBodyOptions() {
+  protected buildFetchBodyOptions(): FetchBodyOptions {
     const fetchOptions: FetchBodyOptions = {
       method: this.method.toUpperCase(),
     };
@@ -206,67 +237,5 @@ export class CurlRequestModel {
     return fetchOptions;
   }
 
-  private generateCurlSyntax(
-    fetchUrl: any,
-    fetchHeaders: Headers | any[],
-    fetchOptions: FetchBodyOptions,
-  ) {
-    let curlUrl;
-    let curl = '';
-    let curlHeaders = '';
-    let curlData = '';
-    let curlForm = '';
-
-    if (!fetchUrl.startsWith('http')) {
-      const url = new URL(fetchUrl, window.location.href);
-      curlUrl = url.href;
-    } else {
-      curlUrl = fetchUrl;
-    }
-
-    curl = `curl -X ${this.method.toUpperCase()} "${curlUrl}" ${NEW_LINE}`;
-
-    curlHeaders = [...(fetchHeaders as any[])]
-      .map(([key, value]) => ` -H "${key}: ${value}"`)
-      .join(` ${NEW_LINE}`);
-    if (curlHeaders) {
-      curlHeaders = `${curlHeaders} ${NEW_LINE}`;
-    }
-    if (fetchOptions.body instanceof URLSearchParams) {
-      curlData = ` -d ${fetchOptions.body.toString()} ${NEW_LINE}`;
-    } else if (fetchOptions.body instanceof File) {
-      curlData = ` --data-binary @${fetchOptions.body.name} ${NEW_LINE}`;
-    } else if (fetchOptions.body instanceof FormData) {
-      curlForm = [...(fetchOptions.body as unknown as any[])]
-        .reduce((aggregator, [key, value]) => {
-          if (value instanceof File) {
-            return [...aggregator, ` -F "${key}=@${value.name}"`];
-          }
-
-          const multiple = value.match(/([^,],)/gm);
-
-          if (multiple) {
-            const multipleResults = multiple.map(one => `-F "${key}[]=${one}"`);
-
-            return [...aggregator, ...multipleResults];
-          }
-
-          return [...aggregator, ` -F "${key}=${value}"`];
-        }, [])
-        .join(` ${NEW_LINE}`);
-    } else if (fetchOptions.body) {
-      if (fetchOptions.body instanceof Object) {
-        try {
-          curlData = ` -d '${JSON.stringify(fetchOptions.body)}' ${NEW_LINE}`;
-        } catch (err) {
-          // Ignore.
-        }
-      }
-      if (!curlData) {
-        curlData = ` -d '${fetchOptions.body.replace(/'/g, "'\"'\"'")}' ${NEW_LINE}`;
-      }
-    }
-
-    return `${curl}${curlHeaders}${curlData}${curlForm}`;
-  }
+  protected abstract getSourceCode(): string;
 }

@@ -2,20 +2,17 @@
 
 exports[`CurlRequest should generate a GET request 1`] = `
 "curl -i -X GET \\"https://example.com/pet/1\\" \\\\
- -H \\"accept: application/json\\" \\\\
-"
+ -H \\"accept: application/json\\""
 `;
 
 exports[`CurlRequest should generate a GET request with parameters 1`] = `
 "curl -i -X GET \\"https://example.com/pet/123?name=\\"Bob\\"&status=\\"available\\"\\" \\\\
- -H \\"accept: application/json\\" \\\\
-"
+ -H \\"accept: application/json\\""
 `;
 
 exports[`CurlRequest should generate a POST request with parameters 1`] = `
 "curl -i -X POST \\"https://example.com/pet/123?name=\\"Bob\\"&status=\\"available\\"\\" \\\\
  -H \\"accept: application/json\\" \\\\
  -H \\"content-type: application/json\\" \\\\
- -d '{\\"id\\":\\"5678\\",\\"foo\\":\\"bar\\"}' \\\\
-"
+ -d '{\\"id\\":\\"5678\\",\\"foo\\":\\"bar\\"}'"
 `;

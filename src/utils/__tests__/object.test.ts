@@ -47,18 +47,18 @@ describe('object utils', () => {
       expect(objectHas(obj, ['a', 'b', 'c1', 'd'])).toBeTruthy();
     });
   });
+});
 
-  describe('groupParamsByKey', () => {
-    it('should group URLSearchParams by key', () => {
-      const params = new URLSearchParams();
-      params.append('a', 'b');
-      params.append('a', 'd');
-      params.append('c', 'e');
+describe('groupParamsByKey', () => {
+  it('should group URLSearchParams by key', () => {
+    const params = new URLSearchParams();
+    params.append('a', 'b');
+    params.append('a', 'd');
+    params.append('c', 'e');
 
-      expect(groupParamsByKey(params.entries())).toEqual({
-        a: ['b', 'd'],
-        c: 'e',
-      });
+    expect(groupParamsByKey(params.entries())).toEqual({
+      a: ['b', 'd'],
+      c: 'e',
     });
   });
 });

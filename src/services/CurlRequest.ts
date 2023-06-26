@@ -50,8 +50,7 @@ export class CurlRequest extends RequestGenerator {
     fetchOptions: FetchBodyOptions,
   ) {
     let curlUrl;
-    let curl = '';
-    let curlHeaders = '';
+    let curlHeaders: string;
     let curlData = '';
     let curlForm = '';
     let cookies = '';
@@ -63,7 +62,7 @@ export class CurlRequest extends RequestGenerator {
       curlUrl = fetchUrl.fullUrl;
     }
 
-    curl = `curl -i -X ${this.method.toUpperCase()} "${curlUrl}" ${NEW_LINE}`;
+    const curlCommand = `curl -i -X ${this.method.toUpperCase()} "${curlUrl}" ${NEW_LINE}`;
 
     curlHeaders = [...fetchHeaders]
       .map(([key, value]) => ` -H "${key}: ${value}"`)
@@ -110,6 +109,6 @@ export class CurlRequest extends RequestGenerator {
       cookies = ` -c "${fetchUrl.cookieParams.toString()}" ${NEW_LINE}`;
     }
 
-    return [curl, curlHeaders, cookies, curlData, curlForm].join('');
+    return [curlCommand, curlHeaders, cookies, curlData, curlForm].join('');
   }
 }

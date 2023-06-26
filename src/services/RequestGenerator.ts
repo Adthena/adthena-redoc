@@ -1,6 +1,9 @@
 import { FieldModel, MediaContentModel, MediaTypeModel } from './models';
 import { SecurityScheme } from './models/SecurityRequirement';
 import { getSerializedValue, serializeParameterValue } from '../utils';
+import { PARAM_STYLE } from '../constants/parameter-style';
+import { REQUEST_HEADERS } from '../constants/request-headers';
+import { MIME_TYPES } from '../constants/mime-types';
 
 export interface FetchBodyOptions {
   body?: any;
@@ -56,7 +59,7 @@ export abstract class RequestGenerator implements RequestGeneratorOptions {
   requestBody?: MediaContentModel | undefined;
   serverUrl: string;
 
-  constructor(options: RequestGeneratorOptions) {
+  protected constructor(options: RequestGeneratorOptions) {
     this.apiKeys = options.apiKeys;
     this.method = options.method;
     this.parameters = options.parameters;
@@ -70,7 +73,7 @@ export abstract class RequestGenerator implements RequestGeneratorOptions {
 
     // Generate URL using Path Params
     this.parameters
-      .filter(param => param.in === 'path' && typeof param.example !== 'undefined')
+      .filter(param => param.in === PARAM_STYLE.PATH && typeof param.example !== 'undefined')
       .forEach(param => {
         fetchUrl = fetchUrl.replace(
           `{${param.name}}`,
@@ -80,7 +83,7 @@ export abstract class RequestGenerator implements RequestGeneratorOptions {
 
     // Query Params
     const urlQueryParams = new URLSearchParams();
-    const queryParameters = this.parameters.filter(param => param.in === 'query');
+    const queryParameters = this.parameters.filter(param => param.in === PARAM_STYLE.QUERY);
     queryParameters.forEach((param: FieldModel) => {
       const value = param.example ?? param.schema.default ?? param.schema.enum?.[0];
 
@@ -116,7 +119,7 @@ export abstract class RequestGenerator implements RequestGeneratorOptions {
 
     // Add authentication Query-Param if provided
     this.apiKeys
-      .filter(scheme => scheme.in === 'query')
+      .filter(scheme => scheme.in === PARAM_STYLE.QUERY)
       .forEach(scheme => {
         fullUrl = `${fullUrl}${fullUrl.includes('?') ? '&' : '?'}${
           scheme.name
@@ -125,7 +128,7 @@ export abstract class RequestGenerator implements RequestGeneratorOptions {
 
     const cookieParams = new URLSearchParams();
     this.parameters
-      .filter(param => param.in === 'cookie')
+      .filter(param => param.in === PARAM_STYLE.COOKIE)
       .forEach(param => {
         const value = param.example ?? param.schema.default;
 
@@ -145,19 +148,19 @@ export abstract class RequestGenerator implements RequestGeneratorOptions {
   }
 
   protected buildFetchHeaders(): Headers {
-    const defaultAcceptHeader = 'application/json';
+    const defaultAcceptHeader = MIME_TYPES.JSON;
     const reqHeaders = new Headers();
 
     // Add Authentication Header if provided
     this.apiKeys
-      .filter(scheme => scheme.in === 'header')
+      .filter(scheme => scheme.in === PARAM_STYLE.HEADER)
       .forEach(scheme => {
         reqHeaders.append(<string>scheme.name, scheme.displayName);
       });
 
     // Add Header Params
     this.parameters
-      .filter(param => param.in === 'header')
+      .filter(param => param.in === PARAM_STYLE.HEADER)
       .forEach(param => {
         if (param.example) {
           reqHeaders.append(param.name, param.example);
@@ -170,14 +173,14 @@ export abstract class RequestGenerator implements RequestGeneratorOptions {
 
     if (this.requestBody?.mediaTypes.length) {
       const [mediaType] = this.requestBody.mediaTypes;
-      if (!mediaType.name.includes('form-data')) {
+      if (mediaType.name !== MIME_TYPES.FORM_DATA) {
         // For multipart/form-data dont set the content-type to allow creation of browser generated part boundaries
-        reqHeaders.append('Content-Type', mediaType.name);
+        reqHeaders.append(REQUEST_HEADERS.CONTENT_TYPE, mediaType.name);
       }
     }
 
-    if (!reqHeaders.get('Accept')) {
-      reqHeaders.append('Accept', defaultAcceptHeader);
+    if (!reqHeaders.get(REQUEST_HEADERS.ACCEPT)) {
+      reqHeaders.append(REQUEST_HEADERS.ACCEPT, defaultAcceptHeader);
     }
 
     return reqHeaders;
@@ -192,7 +195,7 @@ export abstract class RequestGenerator implements RequestGeneratorOptions {
     const { examples, name } = mediaType;
 
     if (examples) {
-      if (name.includes('form-urlencoded') && examples) {
+      if (name === MIME_TYPES.FORM_URL_ENCODED && examples) {
         const formUrlParams = new URLSearchParams();
         Object.entries(examples)
           .filter(([, example]) => !example.mime.includes('file'))
@@ -208,7 +211,7 @@ export abstract class RequestGenerator implements RequestGeneratorOptions {
             }
           });
         fetchOptions.body = formUrlParams;
-      } else if (name.includes('form-data')) {
+      } else if (name === MIME_TYPES.FORM_DATA) {
         const formDataParams = new FormData();
         const [{ value }] = Object.values(examples as object);
         const formDataEls = Object.entries(value);
@@ -227,7 +230,7 @@ export abstract class RequestGenerator implements RequestGeneratorOptions {
       ) {
         const [{ value }] = Object.values(examples as object);
         fetchOptions.body = value;
-      } else if (name.includes('json') || name.includes('xml') || name.includes('text')) {
+      } else if (name === MIME_TYPES.JSON || name === MIME_TYPES.XML || name.includes('text')) {
         const [{ value }] = Object.values(examples as object);
 
         fetchOptions.body = value;

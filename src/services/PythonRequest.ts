@@ -4,7 +4,7 @@ import {
   RequestGenerator,
   RequestGeneratorOptions,
 } from './RequestGenerator';
-import { groupParamsByKey } from '../utils/object';
+import { groupParamsByKey } from '../utils';
 
 const NEW_LINE = '\n';
 

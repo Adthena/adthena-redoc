@@ -27,10 +27,10 @@ export class PythonRequest extends RequestGenerator {
     fetchHeaders: Headers,
     fetchOptions: FetchBodyOptions,
   ) {
-    const imports = `import requests${NEW_LINE}${NEW_LINE}`;
+    const imports = `import requests${NEW_LINE}`;
     let pythonUrlLine = 'url =';
     let pythonResponseLine = 'response = requests.request(';
-    let pythonHeaders = '';
+    let pythonHeaders: string;
     let pythonData = '';
     let pythonQueryParams = '';
     let pythonCookies = '';
@@ -43,7 +43,7 @@ export class PythonRequest extends RequestGenerator {
     }
 
     if (pythonUrlLine) {
-      pythonUrlLine = `${pythonUrlLine}${NEW_LINE}${NEW_LINE}`;
+      pythonUrlLine = `${pythonUrlLine}${NEW_LINE}`;
     }
 
     pythonHeaders = JSON.stringify(
@@ -53,7 +53,7 @@ export class PythonRequest extends RequestGenerator {
     );
 
     if (pythonHeaders && pythonHeaders != '{}') {
-      pythonHeaders = `headers = ${pythonHeaders}${NEW_LINE}${NEW_LINE}`;
+      pythonHeaders = `headers = ${pythonHeaders}${NEW_LINE}`;
     }
 
     if (fetchUrl.queryParams?.toString()) {
@@ -62,7 +62,7 @@ export class PythonRequest extends RequestGenerator {
         undefined,
         2,
       );
-      pythonQueryParams = `params = ${pythonQueryParams}${NEW_LINE}${NEW_LINE}`;
+      pythonQueryParams = `params = ${pythonQueryParams}${NEW_LINE}`;
     }
 
     if (fetchOptions.body instanceof URLSearchParams) {
@@ -81,7 +81,7 @@ export class PythonRequest extends RequestGenerator {
     }
 
     if (pythonData) {
-      pythonData = `${pythonData}${NEW_LINE}${NEW_LINE}`;
+      pythonData = `${pythonData}${NEW_LINE}`;
     }
 
     if (fetchUrl.cookieParams?.toString()) {
@@ -89,7 +89,7 @@ export class PythonRequest extends RequestGenerator {
         groupParamsByKey(fetchUrl.cookieParams?.entries()),
         undefined,
         2,
-      )}${NEW_LINE}${NEW_LINE}`;
+      )}${NEW_LINE}`;
     }
 
     const params = [
@@ -100,7 +100,7 @@ export class PythonRequest extends RequestGenerator {
       pythonQueryParams ? 'params=params' : '',
       pythonCookies ? 'cookies=cookies' : '',
     ];
-    pythonResponseLine += `${params.filter(Boolean).join(', ')})${NEW_LINE}${NEW_LINE}`;
+    pythonResponseLine += `${params.filter(Boolean).join(', ')})${NEW_LINE}`;
 
     let logging = `print(response.status_code)${NEW_LINE}`;
     logging += this.getResponseLogging(fetchHeaders.get('accept') || '');
@@ -114,7 +114,9 @@ export class PythonRequest extends RequestGenerator {
       pythonData,
       pythonResponseLine,
       logging,
-    ].join('');
+    ]
+      .filter(Boolean)
+      .join(NEW_LINE);
   }
 
   private getResponseLogging(acceptHeader: string) {

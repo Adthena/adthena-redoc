@@ -50,7 +50,6 @@ export class CurlRequest extends RequestGenerator {
     fetchOptions: FetchBodyOptions,
   ) {
     let curlUrl;
-    let curlHeaders: string;
     let curlData = '';
     let curlForm = '';
     let cookies = '';
@@ -62,18 +61,16 @@ export class CurlRequest extends RequestGenerator {
       curlUrl = fetchUrl.fullUrl;
     }
 
-    const curlCommand = `curl -i -X ${this.method.toUpperCase()} "${curlUrl}" ${NEW_LINE}`;
+    const curlCommand = `curl -i -X ${this.method.toUpperCase()} "${curlUrl}"`;
 
-    curlHeaders = [...fetchHeaders]
+    const curlHeaders = [...fetchHeaders]
       .map(([key, value]) => ` -H "${key}: ${value}"`)
       .join(` ${NEW_LINE}`);
-    if (curlHeaders) {
-      curlHeaders = `${curlHeaders} ${NEW_LINE}`;
-    }
+
     if (fetchOptions.body instanceof URLSearchParams) {
-      curlData = ` -d ${fetchOptions.body.toString()} ${NEW_LINE}`;
+      curlData = ` -d ${fetchOptions.body.toString()}`;
     } else if (fetchOptions.body instanceof File) {
-      curlData = ` --data-binary @${fetchOptions.body.name} ${NEW_LINE}`;
+      curlData = ` --data-binary @${fetchOptions.body.name}`;
     } else if (fetchOptions.body instanceof FormData) {
       curlForm = [...(fetchOptions.body as unknown as any[])]
         .reduce((aggregator, [key, value]) => {
@@ -95,20 +92,22 @@ export class CurlRequest extends RequestGenerator {
     } else if (fetchOptions.body) {
       if (fetchOptions.body instanceof Object) {
         try {
-          curlData = ` -d '${JSON.stringify(fetchOptions.body)}' ${NEW_LINE}`;
+          curlData = ` -d '${JSON.stringify(fetchOptions.body)}'`;
         } catch (err) {
           // Ignore.
         }
       }
       if (!curlData) {
-        curlData = ` -d '${fetchOptions.body.replace(/'/g, "'\"'\"'")}' ${NEW_LINE}`;
+        curlData = ` -d '${fetchOptions.body.replace(/'/g, "'\"'\"'")}'`;
       }
     }
 
     if (fetchUrl.cookieParams?.toString()) {
-      cookies = ` -c "${fetchUrl.cookieParams.toString()}" ${NEW_LINE}`;
+      cookies = ` -c "${fetchUrl.cookieParams.toString()}"`;
     }
 
-    return [curlCommand, curlHeaders, cookies, curlData, curlForm].join('');
+    return [curlCommand, curlHeaders, cookies, curlData, curlForm]
+      .filter(Boolean)
+      .join(` ${NEW_LINE}`);
   }
 }

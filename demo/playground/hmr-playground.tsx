@@ -15,7 +15,7 @@ const options: RedocRawOptions = {
   nativeScrollbars: false,
   maxDisplayedEnumValues: 3,
   codeSamplesLanguages: ['json', 'xml', 'csv'],
-  requestSamplesLanguages: ['curl'],
+  requestSamplesLanguages: ['curl', 'python'],
 };
 
 render(<RedocStandalone specUrl={specUrl} options={options} />, document.getElementById('example'));

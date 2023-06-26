@@ -6,4 +6,5 @@ export const CODE_SAMPLE_LANGUAGES = {
 
 export const REQUEST_SAMPLE_LANGUAGES = {
   CURL: 'curl',
+  PYTHON: 'python',
 } as const;

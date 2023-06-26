@@ -1,4 +1,4 @@
-import { objectHas, objectSet } from '../object';
+import { compact, groupParamsByKey, objectHas, objectSet } from '../object';
 
 describe('object utils', () => {
   let obj;
@@ -46,5 +46,39 @@ describe('object utils', () => {
       objectSet(obj, ['a', 'b', 'c1'], { d: 'd' });
       expect(objectHas(obj, ['a', 'b', 'c1', 'd'])).toBeTruthy();
     });
+  });
+});
+
+describe('groupParamsByKey', () => {
+  it('should group URLSearchParams by key', () => {
+    const params = new URLSearchParams();
+    params.append('a', 'b');
+    params.append('a', 'd');
+    params.append('c', 'e');
+
+    expect(groupParamsByKey(params.entries())).toEqual({
+      a: ['b', 'd'],
+      c: 'e',
+    });
+  });
+});
+
+describe('compact', () => {
+  const obj = {
+    foo: 'bar',
+    bar: null,
+    cool: undefined,
+    test: '',
+  };
+  const obj2 = {
+    foo: 'bar',
+  };
+
+  it('should strip away nullish values from the object', () => {
+    expect(compact(obj)).toMatchObject(obj2);
+  });
+
+  it('should return the same object if there is nothing to compact', () => {
+    expect(compact(obj2)).toMatchObject(obj2);
   });
 });

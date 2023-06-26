@@ -5,6 +5,12 @@ import { isArray, isNumeric, mergeObjects } from '../utils/helpers';
 import { setRedocLabels } from './Labels';
 import { SideNavStyleEnum } from './types';
 import type { LabelsConfigRaw, MDXComponentMeta } from './types';
+import { CODE_SAMPLE_LANGUAGES, REQUEST_SAMPLE_LANGUAGES } from '../constants/languages';
+
+export type CodeSamplesLanguage = typeof CODE_SAMPLE_LANGUAGES[keyof typeof CODE_SAMPLE_LANGUAGES];
+
+export type RequestSamplesLanguage =
+  typeof REQUEST_SAMPLE_LANGUAGES[keyof typeof REQUEST_SAMPLE_LANGUAGES];
 
 export interface RedocRawOptions {
   theme?: ThemeInterface;
@@ -56,6 +62,8 @@ export interface RedocRawOptions {
   hideFab?: boolean;
   minCharacterLengthToInitSearch?: number;
   showWebhookVerb?: boolean;
+  codeSamplesLanguages?: CodeSamplesLanguage[];
+  requestSamplesLanguages?: RequestSamplesLanguage[];
 }
 
 export function argValueToBoolean(val?: string | boolean, defaultValue?: boolean): boolean {
@@ -211,6 +219,26 @@ export class RedocNormalizedOptions {
     return 10;
   }
 
+  private static normalizeCodeSamplesLanguages(
+    value?: CodeSamplesLanguage[],
+  ): CodeSamplesLanguage[] {
+    if (isArray(value)) {
+      return value.map(lang => lang.toLowerCase()) as CodeSamplesLanguage[];
+    }
+
+    return [CODE_SAMPLE_LANGUAGES.JSON];
+  }
+
+  private static normalizeRequestSamplesLanguages(
+    value?: RequestSamplesLanguage[],
+  ): RequestSamplesLanguage[] {
+    if (isArray(value)) {
+      return value.map(lang => lang.toLowerCase()) as RequestSamplesLanguage[];
+    }
+
+    return [];
+  }
+
   theme: ResolvedThemeInterface;
   scrollYOffset: () => number;
   hideHostname: boolean;
@@ -258,6 +286,8 @@ export class RedocNormalizedOptions {
   showWebhookVerb: boolean;
 
   nonce?: string;
+  codeSamplesLanguages: CodeSamplesLanguage[];
+  requestSamplesLanguages: RequestSamplesLanguage[];
 
   constructor(raw: RedocRawOptions, defaults: RedocRawOptions = {}) {
     raw = { ...defaults, ...raw };
@@ -335,5 +365,11 @@ export class RedocNormalizedOptions {
     this.hideFab = argValueToBoolean(raw.hideFab);
     this.minCharacterLengthToInitSearch = argValueToNumber(raw.minCharacterLengthToInitSearch) || 3;
     this.showWebhookVerb = argValueToBoolean(raw.showWebhookVerb);
+    this.codeSamplesLanguages = RedocNormalizedOptions.normalizeCodeSamplesLanguages(
+      raw.codeSamplesLanguages,
+    );
+    this.requestSamplesLanguages = RedocNormalizedOptions.normalizeRequestSamplesLanguages(
+      raw.requestSamplesLanguages,
+    );
   }
 }

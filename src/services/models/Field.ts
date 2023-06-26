@@ -101,7 +101,7 @@ export class FieldModel {
     } else if (info.style) {
       this.style = info.style;
     } else if (this.in) {
-      this.style = DEFAULT_SERIALIZATION[this.in]?.style ?? 'form'; // fallback to from in case "in" is invalid
+      this.style = DEFAULT_SERIALIZATION[this.in]?.style ?? 'form'; // fallback to form in case "in" is invalid
     }
 
     if (info.explode === undefined && this.in) {

@@ -76,6 +76,9 @@ exports[`Components SchemaView discriminator should correctly render SchemaView 
                   "minItems": undefined,
                   "options": RedocNormalizedOptions {
                     "allowedMdComponents": Object {},
+                    "codeSamplesLanguages": Array [
+                      "json",
+                    ],
                     "disableSearch": false,
                     "downloadDefinitionUrl": undefined,
                     "downloadFileName": undefined,
@@ -101,6 +104,7 @@ exports[`Components SchemaView discriminator should correctly render SchemaView 
                     "onlyRequiredInSamples": false,
                     "pathInMiddlePanel": false,
                     "payloadSampleIdx": 0,
+                    "requestSamplesLanguages": Array [],
                     "requiredPropsFirst": false,
                     "schemaExpansionLevel": 0,
                     "scrollYOffset": [Function],
@@ -347,6 +351,9 @@ exports[`Components SchemaView discriminator should correctly render SchemaView 
                   "minItems": undefined,
                   "options": RedocNormalizedOptions {
                     "allowedMdComponents": Object {},
+                    "codeSamplesLanguages": Array [
+                      "json",
+                    ],
                     "disableSearch": false,
                     "downloadDefinitionUrl": undefined,
                     "downloadFileName": undefined,
@@ -372,6 +379,7 @@ exports[`Components SchemaView discriminator should correctly render SchemaView 
                     "onlyRequiredInSamples": false,
                     "pathInMiddlePanel": false,
                     "payloadSampleIdx": 0,
+                    "requestSamplesLanguages": Array [],
                     "requiredPropsFirst": false,
                     "schemaExpansionLevel": 0,
                     "scrollYOffset": [Function],
@@ -605,6 +613,9 @@ exports[`Components SchemaView discriminator should correctly render SchemaView 
             "minItems": undefined,
             "options": RedocNormalizedOptions {
               "allowedMdComponents": Object {},
+              "codeSamplesLanguages": Array [
+                "json",
+              ],
               "disableSearch": false,
               "downloadDefinitionUrl": undefined,
               "downloadFileName": undefined,
@@ -630,6 +641,7 @@ exports[`Components SchemaView discriminator should correctly render SchemaView 
               "onlyRequiredInSamples": false,
               "pathInMiddlePanel": false,
               "payloadSampleIdx": 0,
+              "requestSamplesLanguages": Array [],
               "requiredPropsFirst": false,
               "schemaExpansionLevel": 0,
               "scrollYOffset": [Function],
@@ -925,6 +937,9 @@ exports[`Components SchemaView discriminator should correctly render SchemaView 
                   "minItems": undefined,
                   "options": RedocNormalizedOptions {
                     "allowedMdComponents": Object {},
+                    "codeSamplesLanguages": Array [
+                      "json",
+                    ],
                     "disableSearch": false,
                     "downloadDefinitionUrl": undefined,
                     "downloadFileName": undefined,
@@ -950,6 +965,7 @@ exports[`Components SchemaView discriminator should correctly render SchemaView 
                     "onlyRequiredInSamples": false,
                     "pathInMiddlePanel": false,
                     "payloadSampleIdx": 0,
+                    "requestSamplesLanguages": Array [],
                     "requiredPropsFirst": false,
                     "schemaExpansionLevel": 0,
                     "scrollYOffset": [Function],
@@ -1208,6 +1224,9 @@ exports[`Components SchemaView discriminator should correctly render SchemaView 
                   "minItems": undefined,
                   "options": RedocNormalizedOptions {
                     "allowedMdComponents": Object {},
+                    "codeSamplesLanguages": Array [
+                      "json",
+                    ],
                     "disableSearch": false,
                     "downloadDefinitionUrl": undefined,
                     "downloadFileName": undefined,
@@ -1233,6 +1252,7 @@ exports[`Components SchemaView discriminator should correctly render SchemaView 
                     "onlyRequiredInSamples": false,
                     "pathInMiddlePanel": false,
                     "payloadSampleIdx": 0,
+                    "requestSamplesLanguages": Array [],
                     "requiredPropsFirst": false,
                     "schemaExpansionLevel": 0,
                     "scrollYOffset": [Function],
@@ -1462,6 +1482,9 @@ exports[`Components SchemaView discriminator should correctly render SchemaView 
             "minItems": undefined,
             "options": RedocNormalizedOptions {
               "allowedMdComponents": Object {},
+              "codeSamplesLanguages": Array [
+                "json",
+              ],
               "disableSearch": false,
               "downloadDefinitionUrl": undefined,
               "downloadFileName": undefined,
@@ -1487,6 +1510,7 @@ exports[`Components SchemaView discriminator should correctly render SchemaView 
               "onlyRequiredInSamples": false,
               "pathInMiddlePanel": false,
               "payloadSampleIdx": 0,
+              "requestSamplesLanguages": Array [],
               "requiredPropsFirst": false,
               "schemaExpansionLevel": 0,
               "scrollYOffset": [Function],
@@ -1741,6 +1765,9 @@ exports[`Components SchemaView discriminator should correctly render SchemaView 
         ],
         "options": RedocNormalizedOptions {
           "allowedMdComponents": Object {},
+          "codeSamplesLanguages": Array [
+            "json",
+          ],
           "disableSearch": false,
           "downloadDefinitionUrl": undefined,
           "downloadFileName": undefined,
@@ -1766,6 +1793,7 @@ exports[`Components SchemaView discriminator should correctly render SchemaView 
           "onlyRequiredInSamples": false,
           "pathInMiddlePanel": false,
           "payloadSampleIdx": 0,
+          "requestSamplesLanguages": Array [],
           "requiredPropsFirst": false,
           "schemaExpansionLevel": 0,
           "scrollYOffset": [Function],
@@ -2050,6 +2078,9 @@ exports[`Components SchemaView discriminator should correctly render SchemaView 
             "minItems": undefined,
             "options": RedocNormalizedOptions {
               "allowedMdComponents": Object {},
+              "codeSamplesLanguages": Array [
+                "json",
+              ],
               "disableSearch": false,
               "downloadDefinitionUrl": undefined,
               "downloadFileName": undefined,
@@ -2075,6 +2106,7 @@ exports[`Components SchemaView discriminator should correctly render SchemaView 
               "onlyRequiredInSamples": false,
               "pathInMiddlePanel": false,
               "payloadSampleIdx": 0,
+              "requestSamplesLanguages": Array [],
               "requiredPropsFirst": false,
               "schemaExpansionLevel": 0,
               "scrollYOffset": [Function],
@@ -2321,6 +2353,9 @@ exports[`Components SchemaView discriminator should correctly render SchemaView 
             "minItems": undefined,
             "options": RedocNormalizedOptions {
               "allowedMdComponents": Object {},
+              "codeSamplesLanguages": Array [
+                "json",
+              ],
               "disableSearch": false,
               "downloadDefinitionUrl": undefined,
               "downloadFileName": undefined,
@@ -2346,6 +2381,7 @@ exports[`Components SchemaView discriminator should correctly render SchemaView 
               "onlyRequiredInSamples": false,
               "pathInMiddlePanel": false,
               "payloadSampleIdx": 0,
+              "requestSamplesLanguages": Array [],
               "requiredPropsFirst": false,
               "schemaExpansionLevel": 0,
               "scrollYOffset": [Function],
@@ -2579,6 +2615,9 @@ exports[`Components SchemaView discriminator should correctly render SchemaView 
       "minItems": undefined,
       "options": RedocNormalizedOptions {
         "allowedMdComponents": Object {},
+        "codeSamplesLanguages": Array [
+          "json",
+        ],
         "disableSearch": false,
         "downloadDefinitionUrl": undefined,
         "downloadFileName": undefined,
@@ -2604,6 +2643,7 @@ exports[`Components SchemaView discriminator should correctly render SchemaView 
         "onlyRequiredInSamples": false,
         "pathInMiddlePanel": false,
         "payloadSampleIdx": 0,
+        "requestSamplesLanguages": Array [],
         "requiredPropsFirst": false,
         "schemaExpansionLevel": 0,
         "scrollYOffset": [Function],

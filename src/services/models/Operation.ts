@@ -27,9 +27,11 @@ import type { OpenAPIParser } from '../OpenAPIParser';
 import type { RedocNormalizedOptions, RequestSamplesLanguage } from '../RedocNormalizedOptions';
 import type { MediaContentModel } from './MediaContent';
 import { REQUEST_SAMPLE_LANGUAGES } from '../../constants/languages';
-import { CurlRequestModel } from './CurlRequest';
+import { CurlRequest } from '../CurlRequest';
+import { PythonRequest } from '../PythonRequest';
+import { RequestGeneratorOptions } from '../RequestGenerator';
 
-const { CURL } = REQUEST_SAMPLE_LANGUAGES;
+const { CURL, PYTHON } = REQUEST_SAMPLE_LANGUAGES;
 
 export interface XPayloadSample {
   lang: 'payload';
@@ -218,10 +220,12 @@ export class OperationModel implements IMenuItem {
       lang => !samples.some(sample => sample.lang.toLowerCase() === lang),
     );
 
-    samples = availableForGeneration.flatMap((lang: RequestSamplesLanguage) => {
+    availableForGeneration.forEach((lang: RequestSamplesLanguage) => {
       const example = this.generateRequestExamples(lang, requestBodyContent);
 
-      return [example, ...samples];
+      if (example.source) {
+        samples.push(example);
+      }
     });
 
     if (requestBodyContent) {
@@ -250,24 +254,29 @@ export class OperationModel implements IMenuItem {
       lang,
       label: titleize(lang),
     };
+    const options: RequestGeneratorOptions = {
+      apiKeys: this.security.flatMap(security => security.schemes),
+      method: this.httpVerb,
+      parameters: this.parameters,
+      path: this.path,
+      requestBody: requestBodyContent,
+      serverUrl: this.servers[0].url,
+    };
 
     switch (lang) {
       case CURL: {
-        const curlRequest = new CurlRequestModel({
-          apiKeys: this.security.flatMap(security =>
-            security.schemes.filter(scheme => scheme.id === 'api_key'),
-          ),
-          method: this.httpVerb,
-          parameters: this.parameters,
-          path: this.path,
-          requestBody: requestBodyContent,
-          serverUrl: this.servers[0].url,
-        });
+        const curlRequest = new CurlRequest(options);
         return {
           ...props,
-          source: curlRequest.getCurlCommand(),
+          source: curlRequest.getSourceCode(),
         };
       }
+      case PYTHON:
+        const pythonRequest = new PythonRequest(options);
+        return {
+          ...props,
+          source: pythonRequest.getSourceCode(),
+        };
       default:
         throw new Error(`Unsupported code sample language: ${lang}`);
     }

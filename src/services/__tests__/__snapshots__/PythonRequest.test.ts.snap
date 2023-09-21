@@ -1,0 +1,62 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PythonRequest should generate a GET request 1`] = `
+"import requests
+
+url = \\"https://example.com/pet/1\\"
+
+headers = {
+  \\"accept\\": \\"application/json\\"
+}
+
+response = requests.request(\\"GET\\", url, headers=headers)
+
+print(response.status_code)
+print(response.json())"
+`;
+
+exports[`PythonRequest should generate a GET request with parameters 1`] = `
+"import requests
+
+url = \\"https://example.com/pet/123\\"
+
+headers = {
+  \\"accept\\": \\"application/json\\"
+}
+
+params = {
+  \\"name\\": \\"\\\\\\"Bob\\\\\\"\\",
+  \\"status\\": \\"\\\\\\"available\\\\\\"\\"
+}
+
+response = requests.request(\\"GET\\", url, headers=headers, params=params)
+
+print(response.status_code)
+print(response.json())"
+`;
+
+exports[`PythonRequest should generate a POST request with parameters 1`] = `
+"import requests
+
+url = \\"https://example.com/pet/123\\"
+
+headers = {
+  \\"accept\\": \\"application/json\\",
+  \\"content-type\\": \\"application/json\\"
+}
+
+params = {
+  \\"name\\": \\"\\\\\\"Bob\\\\\\"\\",
+  \\"status\\": \\"\\\\\\"available\\\\\\"\\"
+}
+
+payload = {
+  \\"id\\": \\"5678\\",
+  \\"foo\\": \\"bar\\"
+}
+
+response = requests.request(\\"POST\\", url, data=payload, headers=headers, params=params)
+
+print(response.status_code)
+print(response.json())"
+`;
